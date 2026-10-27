@@ -1,0 +1,163 @@
+name: Verify and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  quality:
+    name: Node ${{ matrix.node-version }} unit, coverage, and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, 24, 26]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - name: Install exact dependencies
+        run: npm ci
+      - name: Audit high-severity dependency findings
+        run: npm audit --audit-level=high
+      - name: Type-check application and browser tests
+        run: npm run typecheck
+      - name: Unit and coverage gate
+        run: npm run test:coverage
+      - name: Build production lesson
+        run: npm run build
+
+  browser:
+    name: Browser claims, accessibility, and reflow
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install exact dependencies
+        run: npm ci
+      - name: Build exact browser artifact
+        run: npm run build
+      - name: Install Chromium and Linux browser dependencies
+        run: npx playwright install --with-deps chromium
+      - name: Learner-visible claim gate
+        run: npm run test:claims
+      - name: Accessibility and reflow gate
+        run: npm run test:a11y
+      - name: Upload exact verified Pages artifact
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        with:
+          path: dist
+
+  claim-integrity:
+    name: Clean-baseline source and bundle mutation gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install exact dependencies
+        run: npm ci
+      - name: Run named source mutations
+        run: npm run test:mutations
+
+  configure-pages:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: [quality, browser, claim-integrity]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: configure-pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy exact verified artifact
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
+
+  dependabot-auto-merge:
+    needs: [quality, browser, claim-integrity]
+    if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - id: meta
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3
+      - name: Leave major updates for human review
+        if: steps.meta.outputs.update-type == 'version-update:semver-major'
+        run: echo 'Major update left open for human review.'
+      - name: Reject an unrecognized Dependabot update type
+        if: >-
+          steps.meta.outputs.update-type != 'version-update:semver-major' &&
+          steps.meta.outputs.update-type != 'version-update:semver-minor' &&
+          steps.meta.outputs.update-type != 'version-update:semver-patch'
+        run: exit 1
+      - name: Merge a gated patch or minor update
+        if: >-
+          steps.meta.outputs.update-type == 'version-update:semver-minor' ||
+          steps.meta.outputs.update-type == 'version-update:semver-patch'
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          merged=""
+          for attempt in 1 2 3; do
+            if gh pr merge --squash --delete-branch "$PR_URL"; then
+              merged=1
+              break
+            fi
+            echo "merge attempt $attempt failed; retrying after the base branch settles"
+            sleep 15
+          done
+          if [ -z "$merged" ]; then
+            echo "::error::gate passed, but the Dependabot PR did not merge after 3 attempts"
+            exit 1
+          fi
+          # A merge made with GITHUB_TOKEN raises no push event -- GitHub suppresses
+          # them so workflows cannot retrigger themselves -- so deploy would never run
+          # and the site would keep serving the previous build. Ask for it explicitly;
+          # a workflow_dispatch through the API is not suppressed. The dispatched run
+          # is the same gate-then-deploy pipeline, so a bad merge still ships nothing.
+          gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main || {
+            echo "::error::merge landed, but the required deploy workflow did not dispatch"
+            exit 1
+          }
+
