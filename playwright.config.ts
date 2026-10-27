@@ -8,7 +8,7 @@ export default defineConfig({
   outputDir: 'test-results/playwright',
   fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),
-  retries: 0,
+  retries: process.env.CI ? 1 : 0,
   workers: 1,
   reporter: 'list',
   use: {
@@ -22,7 +22,7 @@ export default defineConfig({
     { name: 'a11y', testMatch: /a11y\.spec\.ts/, use: { ...devices['Desktop Chrome'] } }
   ],
   webServer: {
-    command: `npm run preview -- --host 127.0.0.1 --port ${PORT} --strictPort`,
+    command: `npm run build && npm run preview -- --host 127.0.0.1 --port ${PORT} --strictPort`,
     url: `http://127.0.0.1:${PORT}${BASE}`,
     reuseExistingServer: false,
     timeout: 30_000
