@@ -29,6 +29,7 @@ for (const viewport of VIEWPORTS) {
 
     await page.setViewportSize(viewport);
     await page.goto('./');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expectNoA11yViolations(page);
 
     await page.locator('#run-button').click();
@@ -45,7 +46,9 @@ for (const viewport of VIEWPORTS) {
 test('the complete experiment is operable from the keyboard', async ({ page }) => {
   await page.goto('./');
   await page.keyboard.press('Tab');
-  await expect(page.locator('.skip-link')).toBeFocused();
+  const skipLink = page.locator('.cl-skip-link');
+  await expect(skipLink).toBeFocused();
+  await expect(skipLink).toHaveAttribute('href', '#app');
 
   await page.locator('#overt-select').focus();
   await page.keyboard.press('ArrowDown');

@@ -18,6 +18,34 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator('#app')).not.toBeEmpty();
 });
 
+test('uses the shared Crypto Lab frame and states the randomness group exactly', async ({ page }) => {
+  await expect(page.locator('.cl-topbar')).toHaveCount(1);
+  await expect(page.locator('.cl-topbar')).toContainText('CRYPTO LAB');
+  await expect(page.getByRole('link', { name: 'Crypto Lab menu' }))
+    .toHaveAttribute('href', 'https://crypto-lab.systemslibrarian.dev/');
+  await expect(page.getByRole('link', { name: 'View this project on GitHub' }))
+    .toHaveAttribute('href', 'https://github.com/systemslibrarian/crypto-lab-anamorphic');
+
+  const why = page.locator('.cl-hero-why');
+  await expect(why).toContainText('WHY IT MATTERS');
+  await expect(why).toContainText('compelled or seized');
+  await expect(page.locator('.scripture-footer')).toContainText('1 Corinthians 10:31');
+
+  const mechanics = page.locator('section[aria-labelledby="mechanics-title"]');
+  await expect(mechanics).toContainText('r = m̂ + t mod q');
+  await expect(mechanics).toContainText('ℓ = 8');
+  await expect(mechanics).not.toContainText('mod ℓ');
+
+  const adaptations = page.getByTestId('adaptations');
+  await expect(adaptations).toContainText('F: K × [2³²] → Z_q');
+  await expect(adaptations).not.toContainText('Z_ℓ');
+
+  await runSelectedScenario(page);
+  await page.locator('details summary').click();
+  await expect(page.locator('details')).toContainText('mod q');
+  await expect(page.locator('details')).not.toContainText('mod ℓ');
+});
+
 test('one ciphertext supports the separately derived ordinary and double-key views', async ({ page }) => {
   await runSelectedScenario(page);
 

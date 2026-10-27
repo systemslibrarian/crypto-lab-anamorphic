@@ -41,25 +41,31 @@ function comparisonRows(): string {
 }
 
 app.innerHTML = `
-  <header class="site-header">
-    <a class="brand" href="https://crypto-lab.systemslibrarian.dev/">CRYPTO LAB</a>
-    <span class="header-tag">A-D-15 · research extension</span>
-  </header>
-
-  <main id="main">
-    <section class="hero" aria-labelledby="page-title">
-      <p class="eyebrow">Receiver-anamorphic encryption · ordinary key disclosure</p>
-      <h1 id="page-title">One ciphertext. Two keys. Two different messages.</h1>
-      <p class="lede">Execute Banfi et al.’s synchronized robust ElGamal extension over the real
-        <code>ristretto255</code> prime-order group. The ordinary key is surrendered and opens the
-        prescribed overt message. A separate double key recovers one bounded covert symbol from
-        the very same two-point ciphertext.</p>
-      <div class="hero-badges" aria-label="Implementation scope">
-        <span>real ristretto255 arithmetic</span>
-        <span>HMAC-SHA-512 PRF</span>
-        <span>bounded message dictionaries</span>
-        <span>not a deployment system</span>
+  <main id="main" tabindex="-1">
+    <section class="hero cl-hero" aria-labelledby="page-title">
+      <div class="cl-hero-main">
+        <p class="eyebrow">A-D-15 · research extension</p>
+        <h1 id="page-title" class="cl-hero-title">Anamorphic Channel</h1>
+        <p class="cl-hero-sub">Receiver-anamorphic encryption · ordinary key disclosure</p>
+        <p class="cl-hero-desc">Execute Banfi et al.’s synchronized robust ElGamal extension over
+          the real <code>ristretto255</code> prime-order group. The ordinary key is surrendered and
+          opens the prescribed overt message. A separate double key recovers one bounded covert
+          symbol from the very same two-point ciphertext.</p>
+        <div class="hero-badges" aria-label="Implementation scope">
+          <span>real ristretto255 arithmetic</span>
+          <span>HMAC-SHA-512 PRF</span>
+          <span>bounded message dictionaries</span>
+          <span>not a deployment system</span>
+        </div>
       </div>
+      <aside class="cl-hero-why" aria-label="Why it matters">
+        <span class="cl-hero-why-label">WHY IT MATTERS</span>
+        <p>Ordinary public-key encryption stops protecting a message once its secret key is
+          compelled or seized. Receiver-anamorphic encryption asks whether that surrendered key
+          can still open the prescribed overt message while a separate, undisclosed double key
+          recovers an additional message from the same conventional ciphertext. This lab makes
+          that coercion boundary—and its synchronization and key-management costs—visible.</p>
+      </aside>
     </section>
 
     <section class="lesson" aria-labelledby="experiment-title">
@@ -104,7 +110,7 @@ app.innerHTML = `
         <article>
           <h3>Anamorphic randomness</h3>
           <p><code>t = F(K, counter)</code></p>
-          <p><code>r = m̂ + t mod ℓ</code></p>
+          <p><code>r = m̂ + t mod q</code></p>
           <p><code>S = C₂ − t·G = m̂·G</code></p>
           <p>Look up <code>S</code> in the bounded covert table.</p>
         </article>
@@ -112,7 +118,8 @@ app.innerHTML = `
       <p class="scope-note">This is the paper’s Construction 6 / Figure 11 written additively.
         Ristretto’s group order is <code>${GROUP_ORDER}</code>. Lemma 5.1 is what licenses
         <code>+</code> as the paper’s own <code>⊕</code>: it proves ElGamal is selective-randomness
-        recoverable with addition modulo <code>ℓ</code> as the randomness-space group operation.</p>
+        recoverable with addition modulo <code>q</code> as the randomness-space group operation.
+        Here <code>q</code> is the group order; <code>ℓ = 8</code> is only the covert-table size.</p>
     </section>
 
     <section class="lesson" aria-labelledby="adapt-title">
@@ -136,7 +143,7 @@ app.innerHTML = `
           <dd>The paper’s <code>aEnc</code> and <code>aDec</code> carry the counter as state and return
             <code>ctr + 1</code>. Here the counter is an input you choose, so uniqueness is your
             responsibility — which is why reuse is demonstrated below as a failure rather than
-            prevented. The PRF domain is <code>F: K × [2³²] → Z_ℓ</code>.</dd></div>
+            prevented. The PRF domain is <code>F: K × [2³²] → Z_q</code>.</dd></div>
         <div><dt data-adaptation="browser">Browser implementation</dt>
           <dd>TypeScript over pinned <code>@noble/curves</code>, running in your tab. Not constant-time,
             not audited, not interoperable with any deployed anamorphic system, and not a library.</dd></div>
@@ -214,9 +221,9 @@ app.innerHTML = `
     </section>
   </main>
 
-  <footer>
-    <span>All keys and experiment values are synthetic and processed locally in this page.</span>
-    <span>Source publication pending review</span>
+  <footer class="scripture-footer">
+    <p>All keys and experiment values are synthetic and processed locally in this page.</p>
+    <p>So whether you eat or drink or whatever you do, do it all for the glory of God. — 1 Corinthians 10:31</p>
   </footer>
 `;
 
@@ -295,7 +302,7 @@ function resultMarkup(result: ScenarioResult): string {
       </article>
       <details>
         <summary>Omniscient classroom audit (not the coercer’s view)</summary>
-        <p><code>r = m̂ + F(K,counter) mod ℓ</code> recomputed: <strong class="${result.audit.relationHolds ? 'pass' : 'fail'}">${result.audit.relationHolds ? 'YES' : 'NO'}</strong></p>
+        <p><code>r = m̂ + F(K,counter) mod q</code> recomputed: <strong class="${result.audit.relationHolds ? 'pass' : 'fail'}">${result.audit.relationHolds ? 'YES' : 'NO'}</strong></p>
         <p>PRF mask: <code class="break">${result.audit.maskHex}</code></p>
         <p>Covert scalar: <code class="break">${result.audit.covertScalarHex}</code></p>
         <p>Derived randomness: <code class="break">${result.audit.randomnessHex}</code></p>

@@ -1,10 +1,12 @@
 # Anamorphic Channel
 
+## What It Is
+
 Anamorphic Channel is a bounded, executable lesson for ordinary-key disclosure in receiver-anamorphic public-key encryption. It implements Banfi, Gegier, Hirt, Maurer and Rito's synchronized robust anamorphic ElGamal extension (`SyncAnamElGamal`, Construction 6 / Figure 11) over the real `ristretto255` prime-order group. Construction 6 is the pre-computation form of the generic Construction 2 instantiated on the ElGamal scheme of Construction 5, and it inherits Lemmas 4.3 and 4.4 from that generic construction. One ordinary two-point ElGamal ciphertext opens to a prescribed overt group message under the surrendered ordinary secret key, while a separate PRF double key and synchronized counter recover one bounded covert symbol from the same ciphertext.
 
 This is a mechanism lesson, not a deployment system. It does not establish coercion resistance by running a browser sample, and it does not add integrity, CCA security, metadata protection, key exchange, counter recovery or production key custody.
 
-## What the lesson executes
+## Exhibits
 
 The implementation writes the paper's multiplicative ElGamal construction additively:
 
@@ -35,13 +37,23 @@ only here, and `docs/source-map.md` ties each to the line that implements it.
 | --- | --- | --- | --- |
 | A1 | Ristretto255 transcription | an abstract cyclic group `G` of prime order `q`, written multiplicatively | one concrete prime-order group with one canonical encoding (RFC 9496), written additively |
 | A2 | Bounded eight-message table | any `M̂ ⊆ Z_q` with `ℓ = |M̂|`; any `m ∈ G` | `M̂ = {1,…,8}` so `ℓ = 8`; four declared overt group elements |
-| A3 | External counter synchronization | `aEnc` and `aDec` carry the counter and return `ctr+1` | the counter is an input, so uniqueness is the caller's duty and reuse is demonstrated rather than prevented; `F: K × [2³²] → Z_ℓ` |
+| A3 | External counter synchronization | `aEnc` and `aDec` carry the counter and return `ctr+1` | the counter is an input, so uniqueness is the caller's duty and reuse is demonstrated rather than prevented; `F: K × [2³²] → Z_q` |
 | A4 | Browser implementation | none | TypeScript over pinned `@noble/curves`, in a tab |
 | A5 | `aGen` narrowed to the public key | `aGen(sk, pk)`, but `dk := (K, T, pk)` | `createDoubleKey(publicKey, …)`, so the double key provably cannot hold `sk` |
 
 A2 is the one with a numeric consequence: `ℓ = 8` is the same `ℓ` that appears in Lemma 4.4's
 `q·ℓ/ρ` term, so the bounded table is also what makes the printed robustness bound as small
 as it is.
+
+## When to Use It
+
+Use this lab to study the receiver-anamorphic threat model, the exact synchronized ElGamal construction, ordinary-key disclosure, bounded covert recovery, and the robustness and counter-reuse boundaries that accompany it. It is also useful for comparing an anamorphic ciphertext with a public subliminal signal or a role-revealing decoy container without conflating their claims.
+
+Do **not** use this code as a covert-communications tool or production cryptosystem. It has no authenticated encryption, counter service, key exchange, secure storage, traffic-analysis defense, or operational coercion protocol.
+
+## Live Demo
+
+Open <https://systemslibrarian.github.io/crypto-lab-anamorphic/>. Choose a prescribed overt message, a bounded covert symbol, and a synchronized counter; then generate a fresh run and inspect the sender, disclosed ordinary-key, and double-key views together with the negative controls.
 
 ## Coercion experiment
 
@@ -53,7 +65,7 @@ Each run generates fresh synthetic keys and renders three distinct views:
 
 The result is retired as soon as an input changes. A fresh execution replaces the prior key material and ciphertext.
 
-## Failure controls
+## What Can Go Wrong
 
 - A normally randomized ElGamal ciphertext opens under the ordinary key but returns bottom under the double key in the deterministic control run.
 - The anamorphic ciphertext returns bottom under the wrong counter and an independently generated double key.
@@ -70,7 +82,15 @@ The final table keeps this construction separate from two existing labs:
 - [Subliminal Channels](https://systemslibrarian.github.io/crypto-lab-subliminal-channels/) carries a public bit through ECDSA `r` parity. It is not encryption and makes no anamorphic-security claim.
 - [Shadow Vault](https://systemslibrarian.github.io/crypto-lab-shadow-vault/) has two independently encrypted AEAD slots in one container. A format-aware reader learns the configured role of a disclosed passphrase; the extra slot does not provide anamorphic role privacy.
 
-## Primary sources
+## Real-World Usage
+
+Anamorphic encryption is research about communication under compelled ordinary-key disclosure. The construction does not make coercion safe in practice: endpoint compromise, traffic analysis, counter desynchronization, disclosure of the double key, authentication, and human operational behavior remain outside the algebra. The page therefore presents one bounded mechanism and its assumptions, not deployment advice.
+
+## Performance
+
+The covert lookup is deliberately bounded to eight entries and is precomputed in the double key. No runtime, memory, throughput, or concrete-security measurement here estimates a production deployment; browser timings would primarily measure this teaching implementation and device, not the construction's security.
+
+## Primary Sources and Versions
 
 - Banfi, Gegier, Hirt, Maurer and Rito, “Anamorphic Encryption, Revisited,” EUROCRYPT 2024, especially Construction 6, Figure 11, and Lemmas 4.3–4.4: <https://crypto.ethz.ch/publications/files/BGHMR24.pdf>
 - Persiano, Phan and Yung, “Anamorphic Encryption: Private Communication against a Dictator,” EUROCRYPT 2022: <https://eprint.iacr.org/2022/639>
@@ -78,7 +98,7 @@ The final table keeps this construction separate from two existing labs:
 
 The source-reading and design decisions are retained in [`brief.md`](brief.md).
 
-## Retained limitations
+## Retained Limitations
 
 **Computational, not empirical.** No number of browser runs establishes that anamorphic
 ciphertexts are distributed like ordinary ones. That is Definition 3.3, and Lemma 4.3
@@ -113,7 +133,7 @@ meant to speak to another implementation.
 secure-memory, traffic-analysis, endpoint-compromise or deniable-key-exchange claim, and
 has had no formal verification or concrete security estimate.
 
-## Development commands
+## How to Run Locally
 
 Use Node.js 22, 24 or 26 and npm 10.9 or newer. The pinned version is in `.nvmrc`.
 
@@ -132,7 +152,7 @@ Use Node.js 22, 24 or 26 and npm 10.9 or newer. The pinned version is in `.nvmrc
 | `npm run test:mutations` | clean baseline, 15 named corruptions, byte-for-byte restore |
 | `npm run check` | every gate above in the order CI runs them |
 
-## Local verification
+## Build & Verify
 
 ```sh
 npm ci
@@ -143,9 +163,9 @@ npm run test:e2e
 npm run test:mutations
 ```
 
-The coverage gate requires at least 95% statements, 90% branches, 95% functions and 95% lines. Browser claim tests exercise the disclosed-key and double-key views, negative controls, result retirement and comparison boundaries. Accessibility tests run WCAG A/AA checks in arrival and completed states at desktop, 390-pixel and 320-pixel widths. The mutation gate requires an unmodified baseline, proves fifteen named corruptions are caught, verifies each mutation reaches the production bundle and restores the source bytes exactly.
+The verified baseline contains 32 unit tests, 11 learner-claim browser checks, four accessibility/reflow/keyboard checks, and 15 named mutations. The coverage gate requires at least 95% statements, 90% branches, 95% functions and 95% lines. Browser claim tests exercise the disclosed-key and double-key views, exact construction notation, shared Crypto Lab frame, negative controls, result retirement and comparison boundaries. Accessibility tests run WCAG A/AA checks in arrival and completed states at desktop, 390-pixel and 320-pixel widths. The mutation gate requires an unmodified baseline, proves every named corruption is caught, verifies each mutation reaches the production bundle and restores the source bytes exactly.
 
-## Related labs
+## Related Demos
 
 - [Subliminal Channels](https://systemslibrarian.github.io/crypto-lab-subliminal-channels/) — the public ECDSA `r`-parity bit, and why a documented selection signal is not encryption.
 - [Shadow Vault](https://systemslibrarian.github.io/crypto-lab-shadow-vault/) — real and decoy AEAD slots in one container, and why an added slot is not anamorphic role privacy.
@@ -157,7 +177,13 @@ The coverage gate requires at least 95% statements, 90% branches, 95% functions 
 - [`docs/source-map.md`](docs/source-map.md) — every paper equation traced to the line that executes it, every learner-visible claim traced to the test that owns it, the five declared adaptations, and the list of things no test here establishes.
 - [`brief.md`](brief.md) — the A-D-15 scope decision and the source reading behind it.
 
-## Repository scope
+## Repository Scope
 
 The app is entirely client-side and retains no learner data. It is MIT licensed. The lesson is educational software, not cryptographic advice or a production library.
+
+---
+
+*One of the browser demos in the [Crypto Lab](https://crypto-lab.systemslibrarian.dev/) suite.*
+
+*“So whether you eat or drink or whatever you do, do it all for the glory of God.” — 1 Corinthians 10:31*
 

@@ -13,7 +13,7 @@ export const COMPARISON_ROWS: readonly ComparisonRow[] = [
     carrier: 'One ordinary two-point ElGamal ciphertext; no mode or role field',
     disclosedView: 'The surrendered ordinary secret key recovers the prescribed overt group message',
     hiddenView: 'The separate PRF double key plus the synchronized counter recovers one bounded covert symbol',
-    boundary: 'Receiver-anamorphic model; relies on DDH/PRF assumptions, a secret double key, and never-reused synchronized counters'
+    boundary: 'Receiver-anamorphic model; the PRF hides the covert symbol, DDH protects ordinary ElGamal from outsiders, and synchronized counters must never repeat'
   },
   {
     system: 'Subliminal Channels',

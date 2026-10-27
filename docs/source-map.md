@@ -24,8 +24,8 @@ on the ElGamal PKE scheme of Construction 5. It inherits security and robustness
 Lemmas 4.3 and 4.4, which are stated for Construction 2.
 
 The paper writes a generic prime-order group multiplicatively; this lab writes
-ristretto255 additively. `G` is the generator, `ℓ` the group order, `·` scalar
-multiplication.
+ristretto255 additively. `G` is the generator, `q` the group order, `ℓ = |M̂|`
+the covert-message-space size, and `·` scalar multiplication.
 
 | BGHMR24 | Paper statement | Code |
 | --- | --- | --- |
@@ -105,6 +105,7 @@ bound as small as it is.
 | the three receiver views render, `sk` is disclosed in full | `e2e/claims.spec.ts` — "one ciphertext supports the separately derived…" |
 | every negative control renders `⊥` from the run | `e2e/claims.spec.ts` — "negative controls and synchronization failure…" |
 | each run is fresh; changed input retires the verdict; bad counter fails closed | `e2e/claims.spec.ts` — "fresh execution…", "changing an input retires…", "an invalid counter fails closed…" |
+| shared Crypto Lab header, why-it-matters panel, dark pin, footer, and exact `Z_q`/`ℓ` distinction | `e2e/claims.spec.ts` — "uses the shared Crypto Lab frame and states the randomness group exactly"; `e2e/a11y.spec.ts` |
 | all five adaptations are named on the page | `e2e/claims.spec.ts` — "every declared adaptation is named on the page…" |
 | PRF and DDH are separated; robustness stays a bound | `e2e/claims.spec.ts` — "the limits separate the PRF from DDH…" |
 | the wire-shape verdict is qualified as syntactic | `e2e/claims.spec.ts` — "the wire-shape verdict is qualified…" |

@@ -17,6 +17,8 @@ describe('comparison boundary', () => {
     const row = COMPARISON_ROWS[0]!;
     expect(row.disclosedView).toContain('surrendered ordinary secret key');
     expect(row.hiddenView).toContain('double key');
-    expect(row.boundary).toContain('never-reused synchronized counters');
+    expect(row.boundary).toContain('PRF hides the covert symbol');
+    expect(row.boundary).toContain('DDH protects ordinary ElGamal from outsiders');
+    expect(row.boundary).toContain('synchronized counters must never repeat');
   });
 });
