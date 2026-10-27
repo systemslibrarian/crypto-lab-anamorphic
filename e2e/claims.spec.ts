@@ -18,7 +18,7 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator('#app')).not.toBeEmpty();
 });
 
-test('uses the shared Crypto Lab frame and states the randomness group exactly', async ({ page }) => {
+test('uses the exact Crypto Lab frame and states the randomness group exactly', async ({ page }) => {
   await expect(page.locator('.cl-topbar')).toHaveCount(1);
   await expect(page.locator('.cl-topbar')).toContainText('CRYPTO LAB');
   await expect(page.getByRole('link', { name: 'Crypto Lab menu' }))
@@ -26,9 +26,22 @@ test('uses the shared Crypto Lab frame and states the randomness group exactly',
   await expect(page.getByRole('link', { name: 'View this project on GitHub' }))
     .toHaveAttribute('href', 'https://github.com/systemslibrarian/crypto-lab-anamorphic');
 
+  const hero = page.locator('#app > main > header.cl-hero:first-child');
+  await expect(hero).toHaveCount(1);
+  await expect(page.locator('h1')).toHaveCount(1);
+  await expect(hero.locator('.cl-hero-title')).toHaveText('Anamorphic Channel');
+  await expect(hero.locator('.cl-hero-sub'))
+    .toHaveText('Synchronized robust Anamorphic ElGamal · EUROCRYPT 2024');
+  await expect(hero.locator('.cl-hero-desc')).toContainText('one real ristretto255 ciphertext');
+  const titleSize = await hero.locator('.cl-hero-title').evaluate((element) => (
+    Number.parseFloat(getComputedStyle(element).fontSize)
+  ));
+  expect(titleSize).toBeLessThanOrEqual(43.2);
+
   const why = page.locator('.cl-hero-why');
   await expect(why).toContainText('WHY IT MATTERS');
   await expect(why).toContainText('compelled or seized');
+  await expect(why.locator('.cl-hero-why-text')).toHaveCount(1);
   await expect(page.locator('.scripture-footer')).toContainText('1 Corinthians 10:31');
 
   const mechanics = page.locator('section[aria-labelledby="mechanics-title"]');

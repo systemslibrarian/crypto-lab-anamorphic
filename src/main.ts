@@ -42,31 +42,21 @@ function comparisonRows(): string {
 
 app.innerHTML = `
   <main id="main" tabindex="-1">
-    <section class="hero cl-hero" aria-labelledby="page-title">
+    <header class="cl-hero" aria-labelledby="page-title">
       <div class="cl-hero-main">
-        <p class="eyebrow">A-D-15 · research extension</p>
         <h1 id="page-title" class="cl-hero-title">Anamorphic Channel</h1>
-        <p class="cl-hero-sub">Receiver-anamorphic encryption · ordinary key disclosure</p>
-        <p class="cl-hero-desc">Execute Banfi et al.’s synchronized robust ElGamal extension over
-          the real <code>ristretto255</code> prime-order group. The ordinary key is surrendered and
-          opens the prescribed overt message. A separate double key recovers one bounded covert
-          symbol from the very same two-point ciphertext.</p>
-        <div class="hero-badges" aria-label="Implementation scope">
-          <span>real ristretto255 arithmetic</span>
-          <span>HMAC-SHA-512 PRF</span>
-          <span>bounded message dictionaries</span>
-          <span>not a deployment system</span>
-        </div>
+        <p class="cl-hero-sub">Synchronized robust Anamorphic ElGamal · EUROCRYPT 2024</p>
+        <p class="cl-hero-desc">Run one real <code>ristretto255</code> ciphertext through a disclosed
+          ordinary key and a separate PRF double key to compare its overt and covert openings.</p>
       </div>
       <aside class="cl-hero-why" aria-label="Why it matters">
         <span class="cl-hero-why-label">WHY IT MATTERS</span>
-        <p>Ordinary public-key encryption stops protecting a message once its secret key is
+        <p class="cl-hero-why-text">Ordinary public-key encryption stops protecting a message once its secret key is
           compelled or seized. Receiver-anamorphic encryption asks whether that surrendered key
           can still open the prescribed overt message while a separate, undisclosed double key
-          recovers an additional message from the same conventional ciphertext. This lab makes
-          that coercion boundary—and its synchronization and key-management costs—visible.</p>
+          recovers an additional message from the same conventional ciphertext.</p>
       </aside>
-    </section>
+    </header>
 
     <section class="lesson" aria-labelledby="experiment-title">
       <div class="section-heading">

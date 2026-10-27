@@ -30,6 +30,13 @@ for (const viewport of VIEWPORTS) {
     await page.setViewportSize(viewport);
     await page.goto('./');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    if (viewport.width <= 640) {
+      const mobileHero = await page.locator('.cl-hero-main').evaluate((element) => ({
+        basis: getComputedStyle(element).flexBasis,
+        minWidth: getComputedStyle(element).minWidth
+      }));
+      expect(mobileHero).toEqual({ basis: 'auto', minWidth: '0px' });
+    }
     await expectNoA11yViolations(page);
 
     await page.locator('#run-button').click();
