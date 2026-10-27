@@ -1,0 +1,44 @@
+{
+  "name": "crypto-lab-anamorphic",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Bounded browser lesson for receiver-anamorphic encryption under ordinary key disclosure.",
+  "license": "MIT",
+  "author": "Paul Clark",
+  "homepage": "https://systemslibrarian.github.io/crypto-lab-anamorphic/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/systemslibrarian/crypto-lab-anamorphic.git"
+  },
+  "engines": {
+    "node": "^22.12.0 || ^24.0.0 || >=26.0.0",
+    "npm": ">=10.9.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:claims": "playwright test --project=claims",
+    "test:a11y": "playwright test --project=a11y",
+    "test:e2e": "playwright test",
+    "test:mutations": "node scripts/mutations.mjs",
+    "check": "npm run test:coverage && npm run build && npm run test:claims && npm run test:a11y && npm run test:mutations"
+  },
+  "dependencies": {
+    "@noble/curves": "2.4.0",
+    "@noble/hashes": "2.3.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.64.1",
+    "@types/node": "26.6.5",
+    "@vitest/coverage-v8": "5.0.4",
+    "typescript": "7.0.2",
+    "vite": "8.3.4",
+    "vitest": "5.0.4"
+  }
+}
