@@ -11,7 +11,7 @@ does not land where it says, re-derive it before concluding the claim moved.
 | --- | --- |
 | **BGHMR24** | Banfi, Gegier, Hirt, Maurer & Rito, *Anamorphic Encryption, Revisited*, EUROCRYPT 2024. <https://eprint.iacr.org/2023/249> · <https://crypto.ethz.ch/publications/files/BGHMR24.pdf> |
 | **PPY22** | Persiano, Phan & Yung, *Anamorphic Encryption: Private Communication against a Dictator*, EUROCRYPT 2022. <https://eprint.iacr.org/2022/639> |
-| **RFC 9496** | Nick, Hamburg, Ladd & Valsorda, *The ristretto255 and decaf448 Groups*. <https://www.rfc-editor.org/rfc/rfc9496> |
+| **RFC 9496** | de Valence, Grigg, Hamburg, Lovecruft, Tankersley & Valsorda, *The ristretto255 and decaf448 Groups*. <https://www.rfc-editor.org/rfc/rfc9496> |
 
 Both BGHMR24 copies were read for this lab and carry identical numbering: Construction 5
 and 6 in Section 5.1, Figure 11, Lemmas 4.3 and 4.4 in Section 4.3.
