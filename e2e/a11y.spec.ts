@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { auditControlNames, formatControlNameFailures } from './control-names';
 
 const VIEWPORTS = [
   { name: 'desktop', width: 1280, height: 900 },
@@ -16,6 +17,12 @@ async function expectNoA11yViolations(page: Page): Promise<void> {
     results.violations.map((violation) => (
       `${violation.id}: ${violation.help}\n${violation.nodes.map((node) => node.target.join(' ')).join('\n')}`
     )).join('\n\n')
+  ).toEqual([]);
+  // axe's `label` rule accepts a bare `placeholder` as an accessible name, so a
+  // deleted label can leave this gate green. See `control-names.ts`.
+  expect(
+    formatControlNameFailures(await auditControlNames(page)),
+    'form controls named only by placeholder/title'
   ).toEqual([]);
 }
 
