@@ -137,11 +137,16 @@ test('changing an input retires all verdicts from the old experiment', async ({ 
 });
 
 test('an invalid counter fails closed before a claim is shown', async ({ page }) => {
-  await page.locator('#counter-input').fill('1000001');
+  for (const invalid of ['1000001', '', '-1', '0.5']) {
+    await page.locator('#counter-input').fill(invalid);
+    await page.locator('#run-button').click();
+    await expect(page.locator('#result')).toHaveAttribute('data-state', 'error');
+    await expect(page.locator('#result')).toContainText('whole-number counter');
+    await expect(page.locator('[data-verdict]')).toHaveCount(0);
+  }
+  await page.locator('#counter-input').fill('0');
   await page.locator('#run-button').click();
-  await expect(page.locator('#result')).toHaveAttribute('data-state', 'error');
-  await expect(page.locator('#result')).toContainText('whole-number counter');
-  await expect(page.locator('[data-verdict]')).toHaveCount(0);
+  await expect(page.locator('#result')).toHaveAttribute('data-state', 'complete');
 });
 
 test('every declared adaptation is named on the page, not buried in prose', async ({ page }) => {

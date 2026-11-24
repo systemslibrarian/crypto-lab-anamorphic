@@ -318,7 +318,7 @@ for (const input of [overtSelect, covertSelect, counterInput]) {
 }
 
 runButton.addEventListener('click', () => {
-  const counter = Number(counterInput.value);
+  const counter = counterInput.valueAsNumber;
   if (!Number.isSafeInteger(counter) || counter < 0 || counter > 1_000_000) {
     result.innerHTML = '<p class="error">Use a whole-number counter between 0 and 1,000,000.</p>';
     result.dataset.state = 'error';
